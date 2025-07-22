@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Votación Almuerzo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    input[type="text"] {
+      padding: 0.5rem;
+      width: 200px;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+    .results {
+      margin-top: 2rem;
+    }
+    .vote {
+      margin: 0.3rem 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🍽️ ¿Te sumás al almuerzo de hoy?</h1>
+  <form id="voteForm">
+    <input type="text" id="name" placeholder="Tu nombre" required />
+    <div>
+      <button type="button" onclick="submitVote('Sí')">✅ Sí</button>
+      <button type="button" onclick="submitVote('No')">❌ No</button>
+    </div>
+  </form>
+
+  <div class="results">
+    <h2>📊 Resultados</h2>
+    <div id="yesVotes">
+      <strong>✅ Sí:</strong>
+      <div id="yesList"></div>
+    </div>
+    <div id="noVotes">
+      <strong>❌ No:</strong>
+      <div id="noList"></div>
+    </div>
+  </div>
+
+  <script>
+    const yesList = document.getElementById("yesList");
+    const noList = document.getElementById("noList");
+
+    const votes = JSON.parse(localStorage.getItem("votes")) || [];
+
+    function renderVotes() {
+      yesList.innerHTML = "";
+      noList.innerHTML = "";
+      votes.forEach(vote => {
+        const div = document.createElement("div");
+        div.className = "vote";
+        div.textContent = vote.name;
+        if (vote.choice === "Sí") yesList.appendChild(div);
+        else noList.appendChild(div);
+      });
+    }
+
+    function submitVote(choice) {
+      const name = document.getElementById("name").value.trim();
+      if (!name) return alert("Por favor ingresá tu nombre.");
+      if (votes.some(v => v.name.toLowerCase() === name.toLowerCase())) {
+        return alert("Ya votaste hoy.");
+      }
+      votes.push({ name, choice });
+      localStorage.setItem("votes", JSON.stringify(votes));
+      renderVotes();
+      document.getElementById("voteForm").reset();
+    }
+
+    // Reset automático a las 00:00
+    function resetAtMidnight() {
+      const now = new Date();
+      const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 5, 0) - now;
+      setTimeout(() => {
+        localStorage.removeItem("votes");
+        location.reload();
+      }, millisTillMidnight);
+    }
+
+    renderVotes();
+    resetAtMidnight();
+  </script>
+</body>
+</html>
